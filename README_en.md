@@ -60,26 +60,22 @@ Due to GitHub single file upload limits, model files, ffmpeg executables, design
 
 > NVIDIA provides a list of compute capabilities for each GPU model. Refer to [CUDA GPUs](https://developer.nvidia.com/cuda-gpus) to check which CUDA version is compatible with your GPU.
 
-**Docker Versions:**
+**Docker Versions (Fork-maintained GHCR images):**
 ```shell
   # Nvidia 10, 20, 30 Series Graphics Cards
-  docker run -it --name vsr --gpus all eritpchy/video-subtitle-remover:1.4.0-cuda11.8 python backend/main.py -i test/test.mp4 -o test/test_no_sub.mp4
+  docker run -it --name vsr --gpus all ghcr.io/q249117652/video-remover:cuda-11.8 python backend/main.py -i test/test.mp4 -o test/test_no_sub.mp4
 
   # Nvidia 40 Series Graphics Cards
-  docker run -it --name vsr --gpus all eritpchy/video-subtitle-remover:1.4.0-cuda12.6 python backend/main.py -i test/test.mp4 -o test/test_no_sub.mp4
-
-  # Nvidia 50 Series Graphics Cards
-  docker run -it --name vsr --gpus all eritpchy/video-subtitle-remover:1.4.0-cuda12.8 python backend/main.py -i test/test.mp4 -o test/test_no_sub.mp4
-
-  # AMD / Intel Dedicated or Integrated Graphics
-  docker run -it --name vsr --gpus all eritpchy/video-subtitle-remover:1.4.0-directml python backend/main.py -i test/test.mp4 -o test/test_no_sub.mp4
+  docker run -it --name vsr --gpus all ghcr.io/q249117652/video-remover:cuda-12.6 python backend/main.py -i test/test.mp4 -o test/test_no_sub.mp4
 
   # CPU
-  docker run -it --name vsr --gpus all eritpchy/video-subtitle-remover:1.4.0-cpu python backend/main.py -i test/test.mp4 -o test/test_no_sub.mp4
+  docker run -it --name vsr ghcr.io/q249117652/video-remover:cpu-latest python backend/main.py -i test/test.mp4 -o test/test_no_sub.mp4
 
   # Export video
   docker cp vsr:/vsr/test/test_no_sub.mp4 ./
 ```
+
+> Image registry: https://ghcr.io/q249117652/video-remover
 
 **Command Line:**
 ```
