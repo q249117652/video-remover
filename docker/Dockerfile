@@ -1,11 +1,13 @@
 FROM python:3.12
 
 RUN --mount=type=cache,target=/root/.cache,sharing=private \
-    apt update && \
-    apt install -y libgl1-mesa-glx \
-        # pyside6
-        libegl1 libxkbcommon0 libdbus-1-3 && \
-    true
+    apt-get update -o Acquire::Retries=3 && \
+    apt-get install -y --no-install-recommends \
+        libgl1-mesa-glx \
+        libegl1 \
+        libxkbcommon0 \
+        libdbus-1-3 && \
+    rm -rf /var/lib/apt/lists/*
 
 ADD . /vsr
 ARG CUDA_VERSION=11.8
