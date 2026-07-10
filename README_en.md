@@ -29,7 +29,23 @@ It mainly implements the following functionalities:
 - If you have questions, please join the discussion group: QQ Group 210150985 (full), 806152575 (full), 816881808 (full), 295894827
 - Download the compressed package, extract and run it directly. If it cannot run, follow the tutorial below to try installing from source
 
-**Download:** <a href="https://github.com/YaoFANGUK/video-subtitle-remover/releases">Release</a>
+**Download:** [Release v1.0.0-assets](https://github.com/q249117652/video-remover/releases/tag/v1.0.0-assets)
+
+**Release Assets:**
+
+Due to GitHub file upload limits, model files, ffmpeg binaries, and design assets have been uploaded separately to the Release. Please clone this repo for the source code.
+
+| Path Prefix | Content | Usage |
+|-------------|---------|-------|
+| `backend_ffmpeg_*` | ffmpeg executables (Windows/macOS/Linux) | Audio/video processing |
+| `backend_models_*` | AI model weights (STTN / LAMA / ProPainter / PaddleOCR, etc.) | Subtitle detection and inpainting |
+| `design_*` | Demo assets, icons, research papers | Demo and reference |
+
+**Quick Start:**
+
+1. Clone source: `git clone https://github.com/q249117652/video-remover.git`
+2. Download the large files from the Release and place them back into the corresponding directories.
+3. Install dependencies and run: `python gui.py`
 
 **Pre-built Package Comparison**:
 
