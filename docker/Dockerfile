@@ -1,8 +1,7 @@
 FROM python:3.12
 
-RUN --mount=type=cache,target=/root/.cache,sharing=private \
-    apt-get update -o Acquire::Retries=3 && \
-    apt-get install -y --no-install-recommends \
+RUN apt-get update -o Acquire::Retries=3 --allow-releaseinfo-change && \
+    apt-get install -y --no-install-recommends --fix-missing \
         libgl1-mesa-glx \
         libegl1 \
         libxkbcommon0 \
