@@ -1,0 +1,119 @@
+# ============================================================
+# VSR Watermark Remover - WebUI Docker 镜像
+# ============================================================
+#
+# 用法:
+#   # NVIDIA GPU (CUDA 12.x - 推荐 40/50 系显卡)
+#   docker build -f docker/Dockerfile.webui --build-arg CUDA_VERSION=12.6 -t vsr-webui .
+#   docker run -gpus all -p 7860:7860 vsr-webui
+#
+#   # NVIDIA GPU (CUDA 11.8 - 推荐 20/30 系显卡)
+#   docker build -f docker/Dockerfile.webui --build-arg CUDA_VERSION=11.8 -t vsr-webui .
+#   docker run -gpus all -p 7860:7860 vsr-webui
+#
+#   # CPU only (无 GPU 或 AMD GPU)
+#   docker build -f docker/Dockerfile.webui --build-arg HARDWARE_ACCELERATOR=cpu -t vsr-webui-cpu .
+#   docker run -p 7860:7860 vsr-webui-cpu
+#
+#   # 自定义 Florence-2 模型
+#   docker run -e FLORENCE_MODEL=microsoft/Florence-2-large-ft ... vsr-webui
+#
+# 访问 http://localhost:7860
+#
+
+FROM python:3.12-slim
+
+# 系统依赖
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG CUDA_VERSION=12.6
+ARG HARDWARE_ACCELERATOR=cuda
+
+# ========================================
+# PyTorch 安装（根据硬件加速类型）
+# ========================================
+
+# CUDA 12.x 版本
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=private \
+    if [ "$HARDWARE_ACCELERATOR" = "cuda" ] && [ "$CUDA_VERSION" != "11.8" ]; then \
+        pip install --no-cache-dir \
+            torch==2.7.0 torchvision==0.22.0 \
+            --index-url https://download.pytorch.org/whl/cu$(echo ${CUDA_VERSION} | tr -d '.') && \
+        pip install --no-cache-dir paddlepaddle-gpu==3.0.0 \
+            -i https://www.paddlepaddle.org.cn/packages/stable/cu${CUDA_VERSION}/ ; \
+    fi
+
+# CUDA 11.8 版本
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=private \
+    if [ "$HARDWARE_ACCELERATION" = "cuda" ] && [ "$CUDA_VERSION" = "11.8" ]; then \
+        pip install --no-cache-dir \
+            torch==2.3.1 torchvision==0.18.1 \
+            --index-url https://download.pytorch.org/whl/cu118 && \
+        pip install --no-cache-dir paddlepaddle-gpu==3.0.0 \
+            -i https://www.paddlepaddle.org.cn/packages/stable/cu118/ && \
+        pip install --no-cache-dir onnxruntime-gpu==1.20.1 \
+            --index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-11/pypi/simple/ && \
+        pip install --no-cache-dir setuptools==80.4.0 ; \
+    fi
+
+# CPU 版本
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=private \
+    if [ "$HARDWARE_ACCELERATOR" = "cpu" ]; then \
+        pip install --no-cache-dir torch==2.7.0 torchvision==0.22.0 && \
+        pip install --no-cache-dir paddlepaddle==3.0.0 \
+            -i https://www.paddlepaddle.org.cn/packages/stable/cpu/ ; \
+    fi
+
+# ========================================
+# 项目代码 + Python 依赖
+# ========================================
+
+WORKDIR /vsr
+
+COPY . .
+
+# 安装项目依赖
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=private \
+    pip install --no-cache-dir \
+        gradio>=5.0.0 \
+        transformers>=4.45.0 \
+        accelerate>=1.0.0 \
+        sentencepiece>=0.2.0 && \
+    sed '/^torch/d;/^torchvision/d;/^paddle/d' requirements.txt \
+        | pip install --no-cache-dir -r /dev/stdin || true && \
+    pip install --no-cache-dir -r requirements.txt || true
+
+# ========================================
+# 环境变量
+# ========================================
+
+ENV PYTHONUNBUFFERED=1
+ENV GRADIO_SERVER_NAME=0.0.0.0
+ENV GRADIO_SERVER_PORT=7860
+
+ENV FLORENCE_MODEL=microsoft/Florence-2-base-ft
+ENV DETECTION_PROMPT=watermark
+ENV MAX_BBOX_PERCENT=10
+ENV CONF_THRESHOLD=0.3
+
+# ========================================
+# 数据卷
+# ========================================
+
+VOLUME ["/root/.cache/huggingface"]
+VOLUME ["/vsr/uploads"]
+
+# ========================================
+# 健康检查
+# ========================================
+
+HEALTHCHECK --interval=60s --timeout=10s --start-period=120s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:7860')" || exit 1
+
+EXPOSE 7860
+
+CMD ["python", "/vsr/webui/app.py", "--host", "0.0.0.0", "--port", "7860"]
