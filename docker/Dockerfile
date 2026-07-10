@@ -1,6 +1,7 @@
 FROM python:3.12
 
-RUN apt-get update -o Acquire::Retries=3 --allow-releaseinfo-change && \
+RUN sed -i 's/deb.debian.org/cloudfront.debian.org/g' /etc/apt/sources.list && \
+    apt-get update -o Acquire::Retries=3 --allow-releaseinfo-change && \
     apt-get install -y --no-install-recommends --fix-missing \
         libgl1-mesa-glx \
         libegl1 \
