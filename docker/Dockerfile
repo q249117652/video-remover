@@ -1,13 +1,6 @@
 FROM python:3.12
 
-RUN sed -i 's/deb.debian.org/cloudfront.debian.org/g' /etc/apt/sources.list && \
-    apt-get update -o Acquire::Retries=3 --allow-releaseinfo-change && \
-    apt-get install -y --no-install-recommends --fix-missing \
-        libgl1-mesa-glx \
-        libegl1 \
-        libxkbcommon0 \
-        libdbus-1-3 && \
-    rm -rf /var/lib/apt/lists/*
+ADD . /vsr
 
 ADD . /vsr
 ARG CUDA_VERSION=11.8
