@@ -1,7 +1,7 @@
 [简体中文](README.md) | English
 
 <div align="center">
-  <img src="design/icon_1024.PNG" alt="VSR Logo" width="128" height="128">
+  <img src="https://raw.githubusercontent.com/YaoFANGUK/video-subtitle-remover/main/design/icon_1024.PNG" alt="VSR Logo" width="128" height="128">
 </div>
 <div align="center">
 <a href="https://trendshift.io/repositories/9120" target="_blank"><img src="https://trendshift.io/api/badge/repositories/9120" alt="YaoFANGUK%2Fvideo-subtitle-remover | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
@@ -22,30 +22,31 @@ It mainly implements the following functionalities:
 - Supports automatic removal of all text throughout the entire video (without inputting a position)
 - Supports multi-selection of images for batch removal of watermark text
 
-![demo.png](https://github.com/YaoFANGUK/video-subtitle-remover/raw/main/design/demo.png)
-
 **Instructions:**
 
 - If you have questions, please join the discussion group: QQ Group 210150985 (full), 806152575 (full), 816881808 (full), 295894827
 - Download the compressed package, extract and run it directly. If it cannot run, follow the tutorial below to try installing from source
 
-**Download:** [Release v1.0.0-assets](https://github.com/q249117652/video-remover/releases/tag/v1.0.0-assets)
+**Source Repository (Forked from [YaoFANGUK/video-subtitle-remover](https://github.com/YaoFANGUK/video-subtitle-remover)):**
+- GitHub: https://github.com/q249117652/video-remover
 
-**Release Assets:**
+**Large Files Download (Release):**
 
-Due to GitHub file upload limits, model files, ffmpeg binaries, and design assets have been uploaded separately to the Release. Please clone this repo for the source code.
+Due to GitHub single file upload limits, model files, ffmpeg executables, design assets and other large files have been uploaded separately to the Release. Please download and place them back into the corresponding directories.
 
-| Path Prefix | Content | Usage |
-|-------------|---------|-------|
-| `backend_ffmpeg_*` | ffmpeg executables (Windows/macOS/Linux) | Audio/video processing |
-| `backend_models_*` | AI model weights (STTN / LAMA / ProPainter / PaddleOCR, etc.) | Subtitle detection and inpainting |
-| `design_*` | Demo assets, icons, research papers | Demo and reference |
+| Release Asset | Content | Target Directory |
+|--------------|---------|------------------|
+| `backend_ffmpeg_*` | ffmpeg executables (Windows/macOS/Linux) | `backend/ffmpeg/` |
+| `backend_models_*` | AI model weights (STTN / LAMA / ProPainter / PaddleOCR, etc.) | `backend/models/` |
+| `design_*` | Demo assets, icons, research papers | `design/` |
 
 **Quick Start:**
 
 1. Clone source: `git clone https://github.com/q249117652/video-remover.git`
-2. Download the large files from the Release and place them back into the corresponding directories.
+2. Download large files from [Release v1.0.0-assets](https://github.com/q249117652/video-remover/releases/tag/v1.0.0-assets) and place them back according to the table above.
 3. Install dependencies and run: `python gui.py`
+
+> Note: This repository retains all source code and documentation from the original project. Large files are split into the Release for easier cloning and version control.
 
 **Pre-built Package Comparison**:
 
