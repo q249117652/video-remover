@@ -46,6 +46,34 @@ Frame reconstruction + audio mux
 Output video
 ```
 
+Here is what happens at each stage:
+
+### 1. Input & demux
+ffmpeg demuxes the video into a sequence of frames and the original audio track. Nothing is modified yet — the audio is held back for the final mux step.
+
+### 2. Subtitle / text detection
+A PP-OCR text-detection model scans each frame and locates rectangular regions that contain text. You can:
+- **Pass no coordinates** → auto-detect all text in every frame;
+- **Pass coordinates** (e.g. `-c 900 1080 0 1920`) → only detect within the given region to avoid false hits.
+
+The result is a consolidated "cleanup list" of where text appears.
+
+### 3. Build mask regions
+Detected text regions are turned into binary masks that mark exactly which pixels should be inpainted in each frame. For fixed-position subtitles (e.g. rolling end credits), the mask can be reused across frames to speed things up.
+
+### 4. Inpainting (core step)
+The inpaint model reconstructs the occluded pixels from surrounding context:
+- **STTN**: temporal convolution, great for real footage, fast, can skip detection;
+- **LAMA**: Fourier convolution, best for images and animated video;
+- **ProPainter**: flow propagation, good for fast motion but VRAM-heavy;
+- **OpenCV**: lightweight classical fallback.
+
+### 5. Frame reconstruction & audio mux
+Repaired frames are re-encoded into a video stream and muxed with the original audio from step 1, producing a clip that still has sound.
+
+### 6. Output
+The final video is written to the path you specified, at the same resolution as the input (no scaling, original clarity preserved).
+
 ---
 
 ## Quick start
