@@ -1,288 +1,217 @@
-简体中文 | [English](README_en.md)
+# Video Remover
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/YaoFANGUK/video-subtitle-remover/main/design/icon_1024.PNG" alt="VSR Logo" width="128" height="128">
-</div>
-<div align="center">
-<a href="https://trendshift.io/repositories/9120" target="_blank"><img src="https://trendshift.io/api/badge/repositories/9120" alt="YaoFANGUK%2Fvideo-subtitle-remover | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-<a href="https://trendshift.io/repositories/9120?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-9120" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/trendshift/repositories/9120/daily?language=Python" alt="YaoFANGUK%2Fvideo-subtitle-remover | Trendshift" width="250" height="55"/></a>
-</div>
+> 本地运行的 AI 视频字幕 / 水印去除工具
 
-## 项目简介
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org)
+[![Platform](https://img.shields.io/badge/OS-Windows%20%7C%20macOS%20%7C%20Linux-green.svg)](#)
+[![Docker](https://img.shields.io/badge/Docker-GHCR-blue?logo=docker)](https://ghcr.io/q249117652/video-remover)
 
-![License](https://img.shields.io/badge/License-Apache%202-red.svg)
-![python version](https://img.shields.io/badge/Python-3.11+-blue.svg)
-![support os](https://img.shields.io/badge/OS-Windows/macOS/Linux-green.svg)
-[![Docker](https://img.shields.io/badge/Docker-Image-blue?logo=docker)](https://hub.docker.com/r/eritpchy/video-subtitle-remover)
+---
 
-Video-subtitle-remover (VSR) 是一款基于AI技术，将视频中的硬字幕去除的软件。
-主要实现了以下功能：
-- **无损分辨率**将视频中的硬字幕去除，生成去除字幕后的文件
-- 通过超强AI算法模型，对去除字幕文本的区域进行填充（非相邻像素填充与马赛克去除）
-- 提取原视频字幕，可配合：[video-subtitle-extractor (VSE)](https://github.com/YaoFANGUK/video-subtitle-extractor)
-- 支持自定义字幕位置，仅去除定义位置中的字幕（传入位置）
-- 支持全视频自动去除所有文本（不传入位置）
-- 支持多选图片批量去除水印文本
+## 这是什么
 
-**使用说明：**
+**Video Remover** 是一款完全在本地运行的桌面与命令行工具，利用多种深度学习修复模型自动识别并抹除视频中的**硬字幕**与**静态水印**，再用上下文修复算法补全被遮挡的画面区域，输出接近无痕的结果。
 
-- 有使用问题请加群讨论，QQ群：210150985（已满）、806152575（已满）、816881808（已满）、295894827
-- 直接下载压缩包解压运行，如果不能运行再按照下面的教程，尝试源码安装conda环境运行
+整个处理过程不依赖任何外部云服务，视频不会离开你的机器。
 
-**源码仓库（Fork 自 [YaoFANGUK/video-subtitle-remover](https://github.com/YaoFANGUK/video-subtitle-remover)）：**
-- GitHub：https://github.com/q249117652/video-remover
+### 核心能力
 
-**大文件下载（Release）：**
+- **硬字幕去除**：在尽量保持原始分辨率的前提下，抹除烧录在画面上的字幕文字
+- **AI 上下文填充**：用 STTN / LAMA / ProPainter 等修复模型重建被遮挡区域，而非简单模糊或打马赛克
+- **灵活的区域控制**：既可以传入坐标只清理指定区域，也可以全自动检测并清除整段视频中的文本
+- **批量图片去水印**：同样的能力也适用于静态图片中的水印 / 文字
+- **多后端加速**：支持 NVIDIA CUDA、AMD / Intel DirectML、Apple Silicon 以及纯 CPU 运行
 
-由于 GitHub 单文件上传限制，模型文件、ffmpeg 可执行文件、设计素材等大文件已单独上传至 Release。请下载后放回对应目录。
+---
 
-| Release 资产 | 内容 | 对应目录 |
-|--------------|------|----------|
-| `backend_ffmpeg_*` | ffmpeg 可执行文件（Windows/macOS/Linux） | `backend/ffmpeg/` |
-| `backend_models_*` | AI 模型参数（STTN / LAMA / ProPainter / PaddleOCR 等） | `backend/models/` |
-| `design_*` | 演示素材、图标、论文 PDF | `design/` |
+## 处理流程
 
-**快速开始：**
+```
+输入视频
+   │
+   ▼
+字幕检测 (PP-OCR 文本检测)
+   │
+   ▼
+生成遮罩区域
+   │
+   ▼
+修复模型 (STTN / LAMA / ProPainter / OpenCV)
+   │
+   ▼
+画面重建 + 音轨合并
+   │
+   ▼
+输出视频
+```
 
-1. 克隆源码：`git clone https://github.com/q249117652/video-remover.git`
-2. 从 [Release v1.0.0-assets](https://github.com/q249117652/video-remover/releases/tag/v1.0.0-assets) 下载大文件，按上表放回对应目录。
-3. 安装依赖并运行：`python gui.py`
+---
 
-> 注：本仓库保留了原始项目的全部源码与说明，仅将大文件拆分至 Release，以便于仓库克隆与版本管理。
+## 快速开始
 
-**预构建包对比说明**：
+### 方式一：Docker（推荐，开箱即用）
 
-|       预构建包名          | Python  | Paddle | Torch | 环境                          | 支持的计算能力范围|
-|---------------|------------|--------------|--------------|-----------------------------|----------|
-| `vsr-windows-cpu.7z`              | 3.12 | 3.0.0 | 2.7.0 | 通用                 | 通用       |
-| `vsr-windows-directml.7z`         | 3.12 | 3.0.0 | 2.4.1 | Windows 非Nvidia显卡 | 通用       |
-| `vsr-windows-nvidia-cuda-11.8.7z` | 3.12 | 3.0.0 | 2.7.0 | CUDA 11.8           | 3.5 – 8.9  |
-| `vsr-windows-nvidia-cuda-12.6.7z` | 3.12 | 3.0.0 | 2.7.0 | CUDA 12.6           | 5.0 – 8.9  |
-| `vsr-windows-nvidia-cuda-12.8.7z` | 3.12 | 3.0.0 | 2.7.0 | CUDA 12.8           | 5.0 – 9.0+ |
+镜像已发布到 GitHub Container Registry，无需登录即可拉取：
 
-> NVIDIA官方提供了各GPU型号的计算能力列表，您可以参考链接: [CUDA GPUs](https://developer.nvidia.com/cuda-gpus) 查看你的GPU适合哪个CUDA版本
-
-**Docker 版本（本项目 Fork 维护的 GHCR 镜像）：**
 ```shell
-  # Nvidia 10 20 30系显卡
-  docker run -it --name vsr --gpus all ghcr.io/q249117652/video-remover:cuda-11.8 python backend/main.py -i test/test.mp4 -o test/test_no_sub.mp4
+# NVIDIA 10 / 20 / 30 系显卡（CUDA 11.8）
+docker run -it --name vr --gpus all \
+  ghcr.io/q249117652/video-remover:cuda-11.8 \
+  python backend/main.py -i test/test.mp4 -o test/test_no_sub.mp4
 
-  # Nvidia 40系显卡
-  docker run -it --name vsr --gpus all ghcr.io/q249117652/video-remover:cuda-12.6 python backend/main.py -i test/test.mp4 -o test/test_no_sub.mp4
+# NVIDIA 40 系显卡（CUDA 12.6）
+docker run -it --name vr --gpus all \
+  ghcr.io/q249117652/video-remover:cuda-12.6 \
+  python backend/main.py -i test/test.mp4 -o test/test_no_sub.mp4
 
-  # CPU
-  docker run -it --name vsr ghcr.io/q249117652/video-remover:cpu-latest python backend/main.py -i test/test.mp4 -o test/test_no_sub.mp4
+# 无显卡 / CPU 模式
+docker run -it --name vr \
+  ghcr.io/q249117652/video-remover:cpu-latest \
+  python backend/main.py -i test/test.mp4 -o test/test_no_sub.mp4
 
-  # 导出视频
-  docker cp vsr:/vsr/test/test_no_sub.mp4 ./
+# 把处理好的视频拷贝出来
+docker cp vr:/vsr/test/test_no_sub.mp4 ./
 ```
 
-> 镜像地址：https://ghcr.io/q249117652/video-remover
+可用标签：`cuda-11.8` · `cuda-12.6` · `cpu-latest` · `main`
 
-**命令行参数：**
+### 方式二：源码运行
+
+由于仓库未包含大体积模型与二进制文件，请先从 Release 下载后再运行：
+
+```shell
+# 1. 克隆仓库
+git clone https://github.com/q249117652/video-remover.git
+cd video-remover
+
+# 2. 从 Release 下载大文件（ffmpeg、AI 模型、素材）
+#    下载地址：https://github.com/q249117652/video-remover/releases/tag/v1.0.0-assets
+#    按下方表格放回对应目录
+
+# 3. 创建虚拟环境并安装依赖
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# 4. 运行图形界面 / 命令行
+python gui.py                   # 图形界面
+python backend/main.py          # 命令行
 ```
-Video Subtitle Remover Command Line Tool
+
+#### Release 大文件与目录对应关系
+
+| Release 资产前缀 | 内容 | 放回目录 |
+|------------------|------|----------|
+| `backend_ffmpeg_*` | ffmpeg 可执行文件（Windows / macOS / Linux） | `backend/ffmpeg/` |
+| `backend_models_*` | AI 模型参数（STTN / LAMA / ProPainter / PP-OCR 等） | `backend/models/` |
+| `design_*` | 图标、演示素材、参考资料 | `design/` |
+
+> 说明：GitHub 对单文件体积与仓库体积有限制，因此上述大文件单独存放在 Release 中，源码保持轻量、易于克隆。
+
+---
+
+## 命令行参数
+
+```text
+Video Remover - Command Line Tool
 
 options:
-  -h, --help            show this help message and exit
-  --input INPUT, -i INPUT
-                        Input video file path
-  --output OUTPUT, -o OUTPUT
-                        Output video file path (optional)
-  --subtitle-area-coords YMIN YMAX XMIN XMAX, -c YMIN YMAX XMIN XMAX
-                        Subtitle area coordinates (ymin ymax xmin xmax). Can be specified multiple times for multiple areas.
+  -h, --help            显示帮助信息
+  --input INPUT, -i     输入视频文件路径
+  --output OUTPUT, -o   输出视频文件路径（可选）
+  --subtitle-area-coords YMIN YMAX XMIN XMAX, -c
+                        字幕区域坐标（可多次指定多个区域）
   --inpaint-mode {sttn-auto,sttn-det,lama,propainter,opencv}
-                        Inpaint mode, default is sttn-auto
-```
-## 演示
-
-- GUI版：
-
-<p style="text-align:center;"><img src="https://github.com/YaoFANGUK/video-subtitle-remover/raw/main/design/demo2.gif" alt="demo2.gif"/></p>
-
-<p style="text-align:center;"><a href="https://b23.tv/guEbl9C"><img src="https://github.com/YaoFANGUK/video-subtitle-remover/raw/main/design/demo.gif" alt="demo.gif"/></a></p>
-
-## 源码使用说明
-
-
-#### 1. 安装 Python
-
-请确保您已经安装了 Python 3.12+。
-
-- Windows 用户可以前往 [Python 官网](https://www.python.org/downloads/windows/) 下载并安装 Python。
-- MacOS 用户可以使用 Homebrew 安装：
-  ```shell
-  brew install python@3.12
-  ```
-- Linux 用户可以使用包管理器安装，例如 Ubuntu/Debian：
-  ```shell
-  sudo apt update && sudo apt install python3.12 python3.12-venv python3.12-dev
-  ```
-
-#### 2. 安装依赖文件
-
-请使用虚拟环境来管理项目依赖，避免与系统环境冲突。
-
-（1）创建虚拟环境并激活
-```shell
-python -m venv videoEnv
+                        修复模式，默认 sttn-auto
 ```
 
-- Windows：
-```shell
-videoEnv\\Scripts\\activate
-```
-- MacOS/Linux：
-```shell
-source videoEnv/bin/activate
-```
-
-#### 3. 创建并激活项目目录
-
-切换到源码所在目录：
-```shell
-cd <源码所在目录>
-```
-> 例如：如果您的源代码放在 D 盘的 tools 文件夹下，并且源代码的文件夹名为 video-subtitle-remover，则输入：
-> ```shell
-> cd D:/tools/video-subtitle-remover-main
-> ```
-
-#### 4. 安装合适的运行环境
-
-本项目支持 CUDA (NVIDIA显卡加速)、CPU (无 GPU)、 DirectML (AMD、Intel等GPU/APU加速) 和 macOS (Apple Silicon) 四种运行模式。
-
-##### (1) CUDA（NVIDIA 显卡用户）
-
-> 请确保您的 NVIDIA 显卡驱动支持所选 CUDA 版本。
-
-- 推荐 CUDA 11.8，对应 cuDNN 8.6.0。
-
-- 安装 CUDA：
-  - Windows：[CUDA 11.8 下载](https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_522.06_windows.exe)
-  - Linux：
-    ```shell
-    wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run
-    sudo sh cuda_11.8.0_520.61.05_linux.run
-    ```
-  - MacOS 不支持 CUDA。
-
-- 安装 cuDNN（CUDA 11.8 对应 cuDNN 8.6.0）：
-  - [Windows cuDNN 8.6.0 下载](https://developer.download.nvidia.cn/compute/redist/cudnn/v8.6.0/local_installers/11.8/cudnn-windows-x86_64-8.6.0.163_cuda11-archive.zip)
-  - [Linux cuDNN 8.6.0 下载](https://developer.download.nvidia.cn/compute/redist/cudnn/v8.6.0/local_installers/11.8/cudnn-linux-x86_64-8.6.0.163_cuda11-archive.tar.xz)
-  - 安装方法请参考 NVIDIA 官方文档。
-
-- 安装 PaddlePaddle GPU 版本（CUDA 11.8）：
-  ```shell
-  pip install paddlepaddle-gpu==3.0.0 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
-  ```
-- 安装 Torch GPU 版本（CUDA 11.8）：
-  ```shell
-  pip install torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu118
-  ```
-
-- 安装其他依赖
-  ```shell
-  pip install -r requirements.txt
-  ```
-
-- Linux系统还需要安装
-
-  ```shell
-  # for cuda 12.x
-  pip install onnxruntime-gpu==1.22.0
-  # for cuda 11.x
-  pip install onnxruntime-gpu==1.20.1 --index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-11/pypi/simple/
-  ```
-  > 详情见: [Install ONNX Runtime](https://onnxruntime.ai/docs/install/#install-onnx-runtime-gpu-cuda-12x)
-
-##### (2) DirectML（AMD、Intel等GPU/APU加速卡用户）
-
-- 适用于 Windows 设备的 AMD/NVIDIA/Intel GPU。
-- 安装 ONNX Runtime DirectML 版本：
-  ```shell
-  pip install paddlepaddle==3.0.0 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
-  pip install -r requirements.txt
-  pip install torch_directml==0.2.5.dev240914
-  ```
-##### (3) CPU 运行（无 GPU 加速）
-
-- 适用于没有 GPU 或不希望使用 GPU 的情况。
-  ```shell
-  pip install paddlepaddle==3.0.0 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
-  pip install torch==2.7.0 torchvision==0.22.0
-  pip install -r requirements.txt
-  ```
-##### (4) macOS 运行 (Apple Silicon)
-- 适用于 macOS (Apple Silicon) 设备
-- macOS (Intel) 请使用CPU, 强行使用GPU只会更慢
-- macOS (Apple Silicon)上字幕检测PP-OCRv4-Server模型精度似乎不太理想, 推荐使用其他模型
-  ```shell
-  pip install paddlepaddle==3.0.0 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
-  pip install torch==2.7.0 torchvision==0.22.0
-  pip install -r requirements.txt
-  ```
-  > 基于Python3.13版本测试
-#### 4. 运行程序
-
-- 运行图形化界面
+示例：
 
 ```shell
-python gui.py
+# 全自动去除整段视频字幕
+python backend/main.py -i input.mp4 -o output.mp4
+
+# 只清理画面底部指定区域
+python backend/main.py -i input.mp4 -o output.mp4 -c 900 1080 0 1920
 ```
 
-- 运行命令行版本(CLI)
+---
+
+## 源码安装（按运行环境）
+
+### NVIDIA CUDA（推荐）
 
 ```shell
-python ./backend/main.py
+pip install paddlepaddle-gpu==3.0.0 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
+pip install torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu118
+pip install -r requirements.txt
 ```
 
-## 常见问题
-1. 提取速度慢怎么办
+### CPU（无显卡）
 
-修改backend/config.py中的参数，可以大幅度提高去除速度
-```python
-MODE = InpaintMode.STTN  # 设置为STTN算法
-STTN_SKIP_DETECTION = True # 跳过字幕检测，跳过后可能会导致要去除的字幕遗漏或者误伤不需要去除字幕的视频帧
+```shell
+pip install paddlepaddle==3.0.0 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
+pip install torch==2.7.0 torchvision==0.22.0
+pip install -r requirements.txt
 ```
 
-2. 视频去除效果不好怎么办
+### DirectML（AMD / Intel 显卡）
 
-修改backend/config.py中的参数，尝试不同的去除算法，算法介绍
+```shell
+pip install paddlepaddle==3.0.0 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
+pip install -r requirements.txt
+pip install torch_directml==0.2.5.dev240914
+```
 
-> - InpaintMode.STTN 算法：对于真人视频效果较好，速度快，可以跳过字幕检测
-> - InpaintMode.LAMA 算法：对于图片效果最好，对动画类视频效果好，速度一般，不可以跳过字幕检测
-> - InpaintMode.PROPAINTER 算法： 需要消耗大量显存，速度较慢，对运动非常剧烈的视频效果较好
+### macOS（Apple Silicon）
 
-- 使用STTN算法
+```shell
+pip install paddlepaddle==3.0.0 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
+pip install torch==2.7.0 torchvision==0.22.0
+pip install -r requirements.txt
+```
+
+---
+
+## 调参与常见问题
+
+### 处理太慢？
+
+编辑 `backend/config.py`：
 
 ```python
-MODE = InpaintMode.STTN  # 设置为STTN算法
-# 相邻帧数, 调大会增加显存占用，效果变好
+MODE = InpaintMode.STTN          # 使用 STTN 算法
+STTN_SKIP_DETECTION = True       # 跳过字幕检测（可能漏掉部分字幕）
+```
+
+### 效果不理想？
+
+不同算法各有侧重：
+
+- **STTN**：真人实拍视频效果好、速度快，可跳过检测
+- **LAMA**：图片与动画类视频效果好，速度一般
+- **ProPainter**：消耗显存大、速度慢，适合运动剧烈的镜头
+
+调高参考帧数与邻域步长可提升质量（同时增加显存占用）：
+
+```python
+MODE = InpaintMode.STTN
 STTN_NEIGHBOR_STRIDE = 10
-# 参考帧长度, 调大会增加显存占用，效果变好
 STTN_REFERENCE_LENGTH = 10
-# 设置STTN算法最大同时处理的帧数量，设置越大速度越慢，但效果越好
-# 要保证STTN_MAX_LOAD_NUM大于STTN_NEIGHBOR_STRIDE和STTN_REFERENCE_LENGTH
 STTN_MAX_LOAD_NUM = 30
 ```
-- 使用LAMA算法
-```python
-MODE = InpaintMode.LAMA  # 设置为STTN算法
-LAMA_SUPER_FAST = False  # 保证效果
-```
 
-> 如果对模型去字幕的效果不满意，可以查看design文件夹里面的训练方法，利用backend/tools/train里面的代码进行训练，然后将训练的模型替换旧模型即可
+### macOS 报错 "bad CPU type in executable"
 
-3. 7z文件解压错误
+执行 `softwareupdate --install-rosetta` 安装 Rosetta 后重试。
 
-解决方案：升级7-zip解压程序到最新版本
+---
 
-4. Mac版本运行报错：Error "bad CPU type in executable"
+## 许可证与致谢
 
-解决方案：打开控制台输入`softwareupdate --install-rosetta` 安装rosetta
+本项目以 **Apache License 2.0** 发布。
 
+Video Remover 是基于开源项目 `video-subtitle-remover` 的派生版本，遵循 Apache 2.0 许可进行分发与修改。原始项目版权归原作者所有，本仓库保留其许可证与版权声明。
 
-## 赞助
-
-<img src="https://github.com/YaoFANGUK/video-subtitle-extractor/raw/main/design/sponsor.png" width="600">
+完整许可证文本见 [LICENSE](LICENSE)。
